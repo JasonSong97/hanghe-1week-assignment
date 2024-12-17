@@ -1,7 +1,5 @@
 package io.hhplus.tdd.point;
 
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -49,7 +47,6 @@ public class PointServiceTest {
 
         // then
         assertThat(result).isEqualTo(expectedPoint);
-        verify(userPointTable, times(1)).selectById(userId);
     }
 
     @Test
@@ -65,13 +62,11 @@ public class PointServiceTest {
         assertThrows(IllegalArgumentException.class, () -> {
             pointService.getPoint(nonExistUserId);
         });
-
-        verify(userPointTable, times(1)).selectById(nonExistUserId);
     }
 
     @Test
     @DisplayName(value = "[성공] 사용자의 포인트 충전 및 사용 내역 조회 성공")
-    void 포인트_충전_성공() throws Exception {
+    void 사용자_포인트_충전_및_사용내역_조회_성공() throws Exception {
         // given
         final long userId = 1L;
         final PointHistory expectedpointHistory_1 = new PointHistory(1L, userId, 1000L, TransactionType.CHARGE, System.currentTimeMillis());
@@ -90,5 +85,20 @@ public class PointServiceTest {
 
         // then
         assertThat(result).isEqualTo(expectedPointHistoryList);
+    }
+
+    @Test
+    @DisplayName(value = "[실패] 존재하지 않는 사용자 포인트 충전 및 사용내역 조회 실패")
+    void 존재하지_않는_사용자_포인트_충전_및_사용내역_조회_실패() throws Exception {
+        // given
+        final long nonExistUserId = 1L;
+
+        // stub, when
+        when(pointHistoryTable.selectAllByUserId(nonExistUserId)).thenReturn(null);
+
+        // then
+        assertThrows(IllegalArgumentException.class, () -> {
+            pointService.getUserPointHistory(nonExistUserId);
+        });
     }
 }

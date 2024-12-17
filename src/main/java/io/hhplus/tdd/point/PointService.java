@@ -24,6 +24,10 @@ public class PointService {
     }
 
     public List<PointHistory> getUserPointHistory(long userId) {
+        List<PointHistory> pointHistoryList = pointHistoryTable.selectAllByUserId(userId);
+        if (pointHistoryList == null) {
+            throw new IllegalArgumentException("존재하지 않는 사람입니다.");
+        }
         return pointHistoryTable.selectAllByUserId(userId);
     }
 }
