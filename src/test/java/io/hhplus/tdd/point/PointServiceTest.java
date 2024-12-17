@@ -4,6 +4,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,12 +16,16 @@ import org.mockito.MockitoAnnotations;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
 
 public class PointServiceTest {
     
     @Mock
     private UserPointTable userPointTable;
+    
+    @Mock
+    private PointHistoryTable pointHistoryTable;
 
     @InjectMocks
     private PointService pointService;
@@ -61,5 +67,28 @@ public class PointServiceTest {
         });
 
         verify(userPointTable, times(1)).selectById(nonExistUserId);
+    }
+
+    @Test
+    @DisplayName(value = "[성공] 사용자의 포인트 충전 및 사용 내역 조회 성공")
+    void 포인트_충전_성공() throws Exception {
+        // given
+        final long userId = 1L;
+        final PointHistory expectedpointHistory_1 = new PointHistory(1L, userId, 1000L, TransactionType.CHARGE, System.currentTimeMillis());
+        final PointHistory expectedpointHistory_2 = new PointHistory(2L, userId, 1500L, TransactionType.USE, System.currentTimeMillis());
+        final PointHistory expectedpointHistory_3 = new PointHistory(3L, userId, 2000L, TransactionType.CHARGE, System.currentTimeMillis());
+        final PointHistory expectedpointHistory_4 = new PointHistory(4L, userId, 3000L, TransactionType.USE, System.currentTimeMillis());
+        List<PointHistory> expectedPointHistoryList = List.of(
+            expectedpointHistory_1, expectedpointHistory_2, expectedpointHistory_3, expectedpointHistory_4
+        );
+
+        // stub
+        when(pointHistoryTable.selectAllByUserId(userId)).thenReturn(expectedPointHistoryList);
+
+        // when
+        List<PointHistory> result = pointService.getUserPointHistory(userId);
+
+        // then
+        assertThat(result).isEqualTo(expectedPointHistoryList);
     }
 }
