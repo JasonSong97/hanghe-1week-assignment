@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 public class PointHistoryTable {
+    
     private final List<PointHistory> table = new ArrayList<>();
     private long cursor = 1;
 
