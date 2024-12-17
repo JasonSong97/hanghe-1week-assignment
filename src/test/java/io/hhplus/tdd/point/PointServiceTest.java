@@ -5,6 +5,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -28,6 +29,7 @@ public class PointServiceTest {
     }
 
     @Test
+    @DisplayName(value = "[성공] 포인트 조회 성공")
     void 포인트_조회_성공() throws Exception {
         // given
         final long userId = 1L;
