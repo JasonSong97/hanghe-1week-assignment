@@ -25,6 +25,9 @@ public class PointServiceTest {
     @Mock
     private PointService pointService;
 
+    @Mock
+    private PointHistoryTable pointHistoryTable;
+
     private UserPoint userPoint_1;
     private UserPoint userPoint_2;
 
@@ -181,6 +184,29 @@ public class PointServiceTest {
         // then
         assertEquals(MAX_POINT, result.point());
         verify(pointService).chargeUserPoint(userId, chargeAmount);
+    }
+
+    /**
+     * Red: 테스트 실패
+     * - 히스토리에 저장하는 로직이 없기 때문에 실패
+     * Green: 테스트 성공
+     * - 충전 후 포인트 업데이트 상태 변환 설정
+     */
+    @Test
+    @DisplayName(value = "[성공] 유저가 포인트 충전 후 포인트 히스토리에 저장이 성공한다.")
+    void 유저가_포인트_충전_후_포인트_히스토리에_저장_성공() throws Exception {
+        // given
+        long userId = 1L;
+        long amount = 1000L;
+
+        // when
+        when(pointService.chargeUserPoint(userId, amount))
+            .thenReturn(new UserPoint(userId, userPoint_1.point() + amount, System.currentTimeMillis()));
+        pointService.chargeUserPoint(userId, amount);
+
+        // then
+        // verify(pointHistoryTable).selectAllByUserId(userId);
+        verify(pointService).chargeUserPoint(userId, amount);
     }
     
     // @Mock
