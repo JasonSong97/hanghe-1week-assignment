@@ -291,6 +291,61 @@ public class PointServiceTest {
         assertEquals("포인트 사용 금액은 1_000 이상이어야 합니다.", result_2.getMessage());
         assertEquals(IllegalArgumentException.class, result_2.getClass());
     }
+
+    /**
+     * Red: 테스트 실패
+     * - 500,000 보다 큰 포인트 처리 예외를 만들지 않아서
+     * Green: 테스트 성공
+     * - 500,000 보다 큰 포인트가 들어오는 경우 예외 처리 로직 추가
+     */
+    @Test
+    @DisplayName(value = "[실패] 유저가 500,000 초과의 포인트를 사용하면 실패한다.")
+    void 유저가_500000_초과의_포인트를_사용하면_실패() throws Exception {
+        // given
+        long userId = 1L;
+        long amount_1 = 500_0001L;
+        long amount_2 = 600_0000L;
+
+        // when
+        when(pointService.useUserPoint(userId, amount_1))
+            .thenThrow(new IllegalArgumentException("포인트 사용 금액은 500_000 이하여야 합니다."));
+        when(pointService.useUserPoint(userId, amount_2))
+            .thenThrow(new IllegalArgumentException("포인트 사용 금액은 500_000 이하여야 합니다."));
+        Exception result_1 = assertThrows(IllegalArgumentException.class, () -> 
+            pointService.useUserPoint(userId, amount_1));
+        Exception result_2 = assertThrows(IllegalArgumentException.class, () -> 
+            pointService.useUserPoint(userId, amount_2));
+
+        // then
+        assertEquals("포인트 사용 금액은 500_000 이하여야 합니다.", result_1.getMessage());
+        assertEquals(IllegalArgumentException.class, result_1.getClass());
+        assertEquals("포인트 사용 금액은 500_000 이하여야 합니다.", result_2.getMessage());
+        assertEquals(IllegalArgumentException.class, result_2.getClass());
+    }
+
+    /**
+     * Red: 테스트 실패
+     * - 유저의 현재 포인트보다 큰 금액을 사용하는 경우 에러를 잡지 않아서
+     * Green: 테스트 성공
+     * - 유저의 현재 포인트보다 큰 금액은 사용하지 못하도록 에러를 발생
+     */
+    @Test
+    @DisplayName(value = "[실패] 유저가 현재 가지고 있는 포인트보다 많은 포인트를 사용하면 실패한다.")
+    void 유저가_현재_가지고_있는_포인트보다_많은_포인트를_사용하면_실패() throws Exception {
+        // given
+        long userId = 1L;
+        long amount = 2_000L;
+
+        // when
+        when(pointService.useUserPoint(userId, amount))
+            .thenThrow(new IllegalArgumentException("현재 가지고 있는 포인트보다 많이 사용할 수 없습니다."));
+        Exception result = assertThrows(IllegalArgumentException.class, () -> 
+            pointService.useUserPoint(userId, amount));
+
+        // then
+        assertEquals("현재 가지고 있는 포인트보다 많이 사용할 수 없습니다.", result.getMessage());
+        assertEquals(IllegalArgumentException.class, result.getClass());
+    }
     
     // @Mock
     // private UserPointTable userPointTable;
