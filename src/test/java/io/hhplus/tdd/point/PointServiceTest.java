@@ -15,6 +15,7 @@ import org.mockito.MockitoAnnotations;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.hhplus.tdd.database.PointHistoryTable;
@@ -27,6 +28,9 @@ public class PointServiceTest {
 
     @Mock
     private PointHistoryTable pointHistoryTable;
+
+    @Mock
+    private UserPointTable userPointTable;
 
     private UserPoint userPoint_1;
     private UserPoint userPoint_2;
@@ -207,6 +211,30 @@ public class PointServiceTest {
         // then
         // verify(pointHistoryTable).selectAllByUserId(userId);
         verify(pointService).chargeUserPoint(userId, amount);
+    }
+
+    /**
+     * Red: 테스트 실패
+     * - 포인트 사용 메소드가 존재하지 않아서 실패
+     * Green: 테스트 성공
+     * - 최소한의 코드로 통과
+     */
+    @Test
+    @DisplayName(value = "[성공] 포인트 사용에 성공한다.")
+    void 포인트_사용_성공() throws Exception {
+        // given
+        long userId = 1L;
+        long amount = 2_000L;
+        UserPoint updatedUserPoint = new UserPoint(userId, 1_000L, System.currentTimeMillis());
+
+        // when
+        when(pointService.useUserPoint(userId, amount))
+            .thenReturn(updatedUserPoint);
+        UserPoint result = pointService.useUserPoint(userId, amount);
+
+        // then
+        assertEquals(1_000L, result.point());
+        verify(pointService).useUserPoint(userId, amount);
     }
     
     // @Mock

@@ -12,6 +12,8 @@ public interface PointService {
 
     UserPoint chargeUserPoint(long id, long amount);
 
+    UserPoint useUserPoint(long userId, long amount);
+
     // private final UserPointTable userPointTable;
     // private final PointHistoryTable pointHistoryTable;
 
