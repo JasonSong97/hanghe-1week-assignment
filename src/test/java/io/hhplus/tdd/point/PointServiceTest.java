@@ -443,6 +443,29 @@ public class PointServiceTest {
         assertEquals(13_000L, result.get(0).amount() + result.get(1).amount() + result.get(2).amount() + result.get(3).amount());
         verify(pointService).findUserHistory(userId);
     }
+
+    /**
+     * Red: 테스트 실패
+     * - 존재하지 않는 유저를 예외처리하는 로직이 없어서
+     * Green: 테스트 성공
+     * - 존재하지 않는 유저를 예외처리하기
+     */
+    @Test
+    @DisplayName(value = "[실패] 존재하지 않는 유저가 포인트 충전과 포인트 사용내역을 조회하면 실패한다.")
+    void 존재하지_않는_유저가_포인트_충전과_포인트_사용내역을_조회하면_실패() throws Exception {
+        // given
+        long userId = 999L;
+
+        // when
+        when(pointService.findUserHistory(userId))
+            .thenThrow(new IllegalArgumentException("존재하지 않는 유저입니다."));
+        Exception result = assertThrows(IllegalArgumentException.class, () -> 
+            pointService.findUserHistory(userId));
+
+        // then
+        assertEquals("존재하지 않는 유저입니다.", result.getMessage());
+        assertEquals(IllegalArgumentException.class, result.getClass());
+    }
     
     // @Mock
     // private UserPointTable userPointTable;
