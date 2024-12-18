@@ -236,6 +236,30 @@ public class PointServiceTest {
         assertEquals(1_000L, result.point());
         verify(pointService).useUserPoint(userId, amount);
     }
+
+    /**
+     * Red: 테스트 실패
+     * - 존재하지 않는 유저 예외를 처리하지 않았기 때문에
+     * Green: 테스트 성공
+     * - 존재하지 않는 유저 예외 처리하기
+     */
+    @Test
+    @DisplayName(value = "[실패] 존재하지 않는 유저가 포인트를 사용하면 실패한다.")
+    void 존재하지_않는_유저가_포인트를_사용하면_실패() throws Exception {
+        // given
+        long userId = 999L;
+        long amount = 1_000L;
+
+        // when
+        when(pointService.useUserPoint(userId, amount))
+            .thenThrow(new IllegalArgumentException("존재하지 않는 유저입니다."));
+        Exception result = assertThrows(IllegalArgumentException.class, () -> 
+            pointService.useUserPoint(userId, amount));
+
+        // then
+        assertEquals("존재하지 않는 유저입니다.", result.getMessage());
+        assertEquals(IllegalArgumentException.class, result.getClass());
+    }
     
     // @Mock
     // private UserPointTable userPointTable;
