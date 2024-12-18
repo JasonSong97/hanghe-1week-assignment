@@ -76,4 +76,46 @@ public class PointServiceImplTest {
         verify(userPointTable, never()).insertOrUpdate(anyLong(), anyLong());
         verify(pointHistoryTable, never()).insert(anyLong(), anyLong(), any(), anyLong());
     }
+
+    @Test
+    @DisplayName(value = "Impl [실패] 유저가 1,000 미만의 포인트를 충전하면 실패한다.")
+    void 유저가_1000_미만의_포인트를_충전하면_실패케이스() throws Exception {
+        // given
+        long userId_1 = 1L;
+        long userId_2 = 2L;
+        long userId_3 = 3L;
+        long amount_1 = 999L;
+        long amount_2 = 0L;
+        long amount_3 = -1L;
+
+        UserPoint userPoint_1 = new UserPoint(userId_1, amount_1, System.currentTimeMillis());
+        UserPoint userPoint_2 = new UserPoint(userId_2, amount_2, System.currentTimeMillis());
+        UserPoint userPoint_3 = new UserPoint(userId_3, amount_3, System.currentTimeMillis());
+
+        // when
+        when(userPointTable.selectById(eq(userId_1)))
+            .thenReturn(userPoint_1);
+        when(userPointTable.selectById(eq(userId_2)))
+            .thenReturn(userPoint_2);
+        when(userPointTable.selectById(eq(userId_3)))
+            .thenReturn(userPoint_3);
+
+        Exception result_1 = assertThrows(IllegalArgumentException.class, () -> 
+            pointServiceImpl.chargeUserPoint(userId_1, amount_1));
+        Exception result_2 = assertThrows(IllegalArgumentException.class, () -> 
+            pointServiceImpl.chargeUserPoint(userId_2, amount_2));
+        Exception result_3 = assertThrows(IllegalArgumentException.class, () -> 
+            pointServiceImpl.chargeUserPoint(userId_3, amount_3));
+
+        // then
+        assertEquals("포인트 충전 금액은 1_000 이상이어야 합니다.", result_1.getMessage());
+        assertEquals(IllegalArgumentException.class, result_1.getClass());
+        assertEquals("포인트 충전 금액은 1_000 이상이어야 합니다.", result_2.getMessage());
+        assertEquals(IllegalArgumentException.class, result_2.getClass());
+        assertEquals("포인트 충전 금액은 1_000 이상이어야 합니다.", result_3.getMessage());
+        assertEquals(IllegalArgumentException.class, result_3.getClass());
+
+        verify(userPointTable, never()).insertOrUpdate(anyLong(), anyLong());
+        verify(pointHistoryTable, never()).insert(anyLong(), anyLong(), any(), anyLong());
+    }
 }

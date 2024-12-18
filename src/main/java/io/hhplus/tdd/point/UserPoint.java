@@ -11,6 +11,9 @@ public record UserPoint(
     }
 
     public UserPoint increaseUserPoints(long amount) {
+        if (amount < 1_000L) {
+            throw new IllegalArgumentException("포인트 충전 금액은 1_000 이상이어야 합니다.");
+        }
         long newPoint = this.point + amount;
         return new UserPoint(this.id, newPoint, System.currentTimeMillis());
     }
