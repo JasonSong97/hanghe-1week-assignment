@@ -25,12 +25,14 @@ public class PointServiceTest {
     @Mock
     private PointService pointService;
 
-    private UserPoint userPoint;
+    private UserPoint userPoint_1;
+    private UserPoint userPoint_2;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this); // @Mock, @InjectMocks 붙은 필드를 실제 Mock 객체로 생성 및 초기화
-        userPoint = new UserPoint(1L, 1_000L, System.currentTimeMillis()); // 초기 세팅
+        userPoint_1 = new UserPoint(1L, 1_000L, System.currentTimeMillis());
+        userPoint_2 = new UserPoint(2L, 910_000L, System.currentTimeMillis());
     }
 
     /**
@@ -155,6 +157,30 @@ public class PointServiceTest {
 
         assertEquals("포인트 충전 금액은 100_000 이하여야 합니다.", result_2.getMessage());
         assertEquals(IllegalArgumentException.class, result_2.getClass());
+    }
+
+    /**
+     * Red: 테스트 실패
+     * - 포인트 충전 후 합이 1,000,000 포인트 이상 나왔는데 MAX처리를 하지 않아서
+     * Green: 테스트 성공
+     * - 포인트 충전 후 합이 1,000,000 포인트 이상이면 MAX_POINT로 변경
+     */
+    @Test
+    @DisplayName(value = "[성공] 유저가 포인트 충전 후 포인트 합계 조회가 1,000,000 초과면 1,000,000로 반환 성공한다.")
+    void 유저가_포인트_충전_후_포인트_합계_조회가_1000000_초과면_1000000로_반환_성공() throws Exception {
+        // given
+        long userId = 2L;
+        final long MAX_POINT = 1_000_000L;
+        long chargeAmount = 100_000L;
+
+        // when
+        when(pointService.chargeUserPoint(userPoint_2.id(), chargeAmount))
+            .thenReturn(new UserPoint(userId, MAX_POINT, System.currentTimeMillis()));
+        UserPoint result = pointService.chargeUserPoint(userId, chargeAmount);
+
+        // then
+        assertEquals(MAX_POINT, result.point());
+        verify(pointService).chargeUserPoint(userId, chargeAmount);
     }
     
     // @Mock
