@@ -368,6 +368,29 @@ public class PointServiceTest {
         // then
         verify(pointService).useUserPoint(userId, amount);
     }
+
+    /**
+     * Red: 테스트 실패
+     * - 포인트 조회하는 로직이 없어서
+     * Green: 테스트 성공
+     * - 포인트 조회하는 로직 추가
+     */
+    @Test
+    @DisplayName(value = "[성공] 포인트 조회에 성공한다.")
+    void 포인트_조회_성공() throws Exception {
+        // given
+        long userId = 1L;
+        long amount = 1_000L;
+
+        // when
+        when(pointService.findUserPoint(userId))
+            .thenReturn(new UserPoint(userId, amount, System.currentTimeMillis()));
+        UserPoint result = pointService.findUserPoint(userId);
+
+        // then
+        assertEquals(1_000L, result.point());
+        verify(pointService).findUserPoint(userId);
+    }
     
     // @Mock
     // private UserPointTable userPointTable;
