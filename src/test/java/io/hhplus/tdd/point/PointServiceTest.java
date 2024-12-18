@@ -79,6 +79,49 @@ public class PointServiceTest {
         assertEquals("존재하지 않는 유저입니다.", result.getMessage());
         assertEquals(IllegalArgumentException.class, result.getClass());
     }
+
+    /**
+     * Red: 테스트 실패
+     * - 1000 보다 작은 포인트 처리 예외를 만들지 않아서
+     * Green: 테스트 성공
+     * - 1000 미만인 금애기 들어오는 경우 예외 처리 로직 추가
+     */
+    @Test
+    @DisplayName(value = "[실패] 유저가 1,000 미만의 포인트를 충전하면 실패한다.")
+    void 유저가_1000미만의_포인트를_충전하면_실패() throws Exception {
+        // given
+        long userId = 1L;
+        long amount_1 = 999L;
+        long amount_2 = 0L;
+        long amount_3 = -10L;
+
+        // when
+        when(pointService.chargeUserPoint(userId, amount_1))
+            .thenThrow(new IllegalArgumentException("포인트 충전 금액은 1000 이상이어야 합니다."));
+        Exception result_1 = assertThrows(IllegalArgumentException.class, () -> 
+            pointService.chargeUserPoint(userId, amount_1)
+        );
+        when(pointService.chargeUserPoint(userId, amount_2))
+            .thenThrow(new IllegalArgumentException("포인트 충전 금액은 1000 이상이어야 합니다."));
+        Exception result_2 = assertThrows(IllegalArgumentException.class, () -> 
+            pointService.chargeUserPoint(userId, amount_2)
+        );
+        when(pointService.chargeUserPoint(userId, amount_3))
+            .thenThrow(new IllegalArgumentException("포인트 충전 금액은 1000 이상이어야 합니다."));
+        Exception result_3 = assertThrows(IllegalArgumentException.class, () -> 
+            pointService.chargeUserPoint(userId, amount_3)
+        );
+
+        // then
+        assertEquals("포인트 충전 금액은 1000 이상이어야 합니다.", result_1.getMessage());
+        assertEquals(IllegalArgumentException.class, result_1.getClass());
+
+        assertEquals("포인트 충전 금액은 1000 이상이어야 합니다.", result_2.getMessage());
+        assertEquals(IllegalArgumentException.class, result_2.getClass());
+
+        assertEquals("포인트 충전 금액은 1000 이상이어야 합니다.", result_3.getMessage());
+        assertEquals(IllegalArgumentException.class, result_3.getClass());
+    }
     
     // @Mock
     // private UserPointTable userPointTable;
