@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 
 public interface PointService {
 
+    UserPoint chargeUserPoint(long id, long amount);
+
     // private final UserPointTable userPointTable;
     // private final PointHistoryTable pointHistoryTable;
 

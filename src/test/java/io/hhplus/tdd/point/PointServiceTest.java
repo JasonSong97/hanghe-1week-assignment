@@ -1,5 +1,6 @@
 package io.hhplus.tdd.point;
 
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -13,12 +14,47 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
 
 public class PointServiceTest {
+
+    @Mock
+    private PointService pointService;
+
+    private UserPoint userPoint;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this); // @Mock, @InjectMocks 붙은 필드를 실제 Mock 객체로 생성 및 초기화
+        userPoint = new UserPoint(1L, 1000L, System.currentTimeMillis()); // 초기 세팅
+    }
+
+    /**
+     * Red: 
+     * - 
+     * Green:
+     * - 
+     */
+    @Test
+    @DisplayName(value = "[성공] 포인트 충전에 성공한다.")
+    void 포인트_충전에_성공한다() {
+        // given
+        long userId = 1L;
+        long amount = 4000L;
+
+        // when
+        when(pointService.chargeUserPoint(userId, amount))
+            .thenReturn(new UserPoint(userId, amount, System.currentTimeMillis()));
+        UserPoint result = pointService.chargeUserPoint(userId, amount);
+
+        // then
+        assertEquals(4000L, result.point());
+        verify(pointService).chargeUserPoint(userId, amount);
+    }
     
     // @Mock
     // private UserPointTable userPointTable;
