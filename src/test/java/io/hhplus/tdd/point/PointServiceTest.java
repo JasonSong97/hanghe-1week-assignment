@@ -260,6 +260,37 @@ public class PointServiceTest {
         assertEquals("존재하지 않는 유저입니다.", result.getMessage());
         assertEquals(IllegalArgumentException.class, result.getClass());
     }
+
+    /**
+     * Red: 테스트 실패
+     * - 1000 보다 작은 포인트 처리 예외를 만들지 않아서
+     * Green: 테스트 성공
+     * - 1000 보다 작은 포인트가 들어오는 경우 예외 처리 로직 추가
+     */
+    @Test
+    @DisplayName(value = "[실패] 유저가 1,000 미만의 포인트를 사용하면 실패한다.")
+    void 유저가_1000_미만의_포인트를_사용하면_실패() throws Exception {
+        // given
+        long userId = 1L;
+        long amount_1 = 1L;
+        long amount_2 = 999L;
+
+        // when
+        when(pointService.useUserPoint(userId, amount_1))
+            .thenThrow(new IllegalArgumentException("포인트 사용 금액은 1_000 이상이어야 합니다."));
+        when(pointService.useUserPoint(userId, amount_2))
+            .thenThrow(new IllegalArgumentException("포인트 사용 금액은 1_000 이상이어야 합니다."));
+        Exception result_1 = assertThrows(IllegalArgumentException.class, () -> 
+            pointService.useUserPoint(userId, amount_1));
+        Exception result_2 = assertThrows(IllegalArgumentException.class, () -> 
+            pointService.useUserPoint(userId, amount_2));
+
+        // then
+        assertEquals("포인트 사용 금액은 1_000 이상이어야 합니다.", result_1.getMessage());
+        assertEquals(IllegalArgumentException.class, result_1.getClass());
+        assertEquals("포인트 사용 금액은 1_000 이상이어야 합니다.", result_2.getMessage());
+        assertEquals(IllegalArgumentException.class, result_2.getClass());
+    }
     
     // @Mock
     // private UserPointTable userPointTable;
