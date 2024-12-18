@@ -34,14 +34,14 @@ public class PointServiceTest {
     }
 
     /**
-     * Red: 
-     * - 
-     * Green:
-     * - 
+     * Red: 테스트 실패
+     * - chargeUserPoint 없음
+     * Green: 테스트 성공
+     * - 최소한의 코드로 통과
      */
     @Test
     @DisplayName(value = "[성공] 포인트 충전에 성공한다.")
-    void 포인트_충전에_성공한다() {
+    void 포인트_충전에_성공한다() throws Exception {
         // given
         long userId = 1L;
         long amount = 4000L;
@@ -54,6 +54,30 @@ public class PointServiceTest {
         // then
         assertEquals(4000L, result.point());
         verify(pointService).chargeUserPoint(userId, amount);
+    }
+
+    /**
+     * Red: 테스트 실패
+     * - 존재하지 않는 유저의 처리 로직이 없기 때문에
+     * Green: 테스트 성공
+     * - 존재하지 않는 에러 처리 로직 추가
+     */
+    @Test
+    @DisplayName(value = "[실패] 존재하지 않는 유저가 포인트를 충전하면 실패한다.")
+    void 존재하지_않는_유저가_포인트를_충전하면_실패() throws Exception {
+        // given
+        long userId = 9999L;
+        long amount = 4000L;
+
+        // when
+        when(pointService.chargeUserPoint(userId, amount))
+            .thenThrow(new IllegalArgumentException("존재하지 않는 유저입니다."));
+        Exception result =  assertThrows(IllegalArgumentException.class, () -> 
+            pointService.chargeUserPoint(userId, amount));
+
+        // then
+        assertEquals("존재하지 않는 유저입니다.", result.getMessage());
+        assertEquals(IllegalArgumentException.class, result.getClass());
     }
     
     // @Mock
