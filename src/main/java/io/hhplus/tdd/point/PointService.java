@@ -16,6 +16,8 @@ public interface PointService {
 
     UserPoint findUserPoint(long id);
 
+    List<PointHistory> findUserHistory(long id);
+
     // private final UserPointTable userPointTable;
     // private final PointHistoryTable pointHistoryTable;
 

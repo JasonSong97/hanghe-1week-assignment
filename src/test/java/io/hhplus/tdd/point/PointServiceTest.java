@@ -414,6 +414,35 @@ public class PointServiceTest {
         assertEquals("존재하지 않는 유저입니다.", result.getMessage());
         assertEquals(IllegalArgumentException.class, result.getClass());
     }
+
+    /**
+     * Red: 테스트 실패
+     * - 포인트 충전과 포인트 사용내역 조회 비즈니스 로직이 존재하지 않아서
+     * Green: 테스트 성공
+     * - 포인트 충전과 포인트 사용내역 조회 비즈니스 로직 작성
+     */
+    @Test
+    @DisplayName(value = "[성공] 포인트 충전과 포인트 사용내역 조회에 성공한다.")
+    void 포인트_충전과_포인트_사용내역_조회에_성공() throws Exception {
+        // given
+        long userId = 1L;
+        PointHistory pointHistory_1 = new PointHistory(1L, userId, 2_000L, TransactionType.CHARGE, System.currentTimeMillis());
+        PointHistory pointHistory_2 = new PointHistory(2L, userId, 4_000L, TransactionType.CHARGE, System.currentTimeMillis());
+        PointHistory pointHistory_3 = new PointHistory(3L, userId, 6_000L, TransactionType.CHARGE, System.currentTimeMillis());
+        PointHistory pointHistory_4 = new PointHistory(4L, userId, 1_000L, TransactionType.USE, System.currentTimeMillis());
+
+        // when
+        when(pointService.findUserHistory(userId))
+            .thenReturn(List.of(pointHistory_1, pointHistory_2, pointHistory_3, pointHistory_4));
+        List<PointHistory> result = pointService.findUserHistory(userId);
+
+        // then
+        assertEquals(4, result.size());
+        assertEquals(4_000L, result.get(1).amount());
+        assertEquals(TransactionType.USE, result.get(3).type());
+        assertEquals(13_000L, result.get(0).amount() + result.get(1).amount() + result.get(2).amount() + result.get(3).amount());
+        verify(pointService).findUserHistory(userId);
+    }
     
     // @Mock
     // private UserPointTable userPointTable;
