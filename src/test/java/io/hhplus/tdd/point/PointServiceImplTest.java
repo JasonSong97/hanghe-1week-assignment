@@ -151,4 +151,24 @@ public class PointServiceImplTest {
         verify(userPointTable, never()).insertOrUpdate(anyLong(), anyLong());
         verify(pointHistoryTable, never()).insert(anyLong(), anyLong(), any(), anyLong());
     }
+
+    @Test
+    @DisplayName(value = "Impl [성공] 포인트 조회에 성공한다.")
+    void 포인트_조회에_성공케이스() throws Exception {
+        // given
+        long userId = 1L;
+        long amount = 1_000L;
+
+        UserPoint userPoint = new UserPoint(userId, amount, System.currentTimeMillis());
+
+        // when
+        when(userPointTable.selectById(userId))
+            .thenReturn(userPoint);
+        UserPoint result = pointServiceImpl.findUserPoint(userId);
+
+        // then
+        assertEquals(1L, result.id());
+        assertEquals(1_000L, result.point());
+        verify(userPointTable, times(1)).selectById(userId);
+    }
 }

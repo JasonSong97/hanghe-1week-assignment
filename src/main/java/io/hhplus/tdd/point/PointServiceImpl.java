@@ -36,9 +36,9 @@ public class PointServiceImpl implements PointService {
     }
 
     @Override
-    public UserPoint findUserPoint(long id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findUserPoint'");
+    public UserPoint findUserPoint(long userId) {
+        UserPoint PSuserPoint = userPointTable.selectById(userId);
+        return PSuserPoint;
     }
 
     @Override
