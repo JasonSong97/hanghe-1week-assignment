@@ -346,6 +346,28 @@ public class PointServiceTest {
         assertEquals("현재 가지고 있는 포인트보다 많이 사용할 수 없습니다.", result.getMessage());
         assertEquals(IllegalArgumentException.class, result.getClass());
     }
+
+    /**
+     * Red: 테스트 실패
+     * - 히스토리에 저장하는 로직이 없기 때문에 실패
+     * Green: 테스트 성공
+     * - 사용 후 포인트 차감하고 히스토리에 저장하는 로직 추가
+     */
+    @Test
+    @DisplayName(value = "[성공] 유저가 포인트 사용 후 포인트 히스토리에 저장이 성공한다.")
+    void 유저가_포인트_사용_후_포인트_히스토리_저장이_성공() throws Exception {
+        // given
+        long userId = 1L;
+        long amount = 500_000L;
+
+        // when
+        when(pointService.useUserPoint(userId, amount))
+            .thenReturn(new UserPoint(userId, userPoint_1.point() + amount, System.currentTimeMillis()));
+        pointService.useUserPoint(userId, amount);
+
+        // then
+        verify(pointService).useUserPoint(userId, amount);
+    }
     
     // @Mock
     // private UserPointTable userPointTable;
