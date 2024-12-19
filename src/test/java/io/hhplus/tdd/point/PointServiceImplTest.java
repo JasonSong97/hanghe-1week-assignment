@@ -11,6 +11,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -189,5 +191,32 @@ public class PointServiceImplTest {
         assertEquals(IllegalArgumentException.class, result.getClass());
 
         verify(userPointTable, times(1)).selectById(userId);
+    }
+
+    @Test
+    @DisplayName(value = "Impl [성공] 포인트 충전과 포인트 사용내역 조회에 성공한다.")
+    void 포인트_충전과_포인트_사용내역_조회에_성공케이스() throws Exception {
+        // given
+        long userId = 1L;
+        List<PointHistory> pointHistoryList = List.of(
+            new PointHistory(1L, userId, 3_000L, TransactionType.CHARGE, System.currentTimeMillis()),
+            new PointHistory(2L, userId, 1_000L, TransactionType.USE, System.currentTimeMillis()),
+            new PointHistory(3L, userId, 3_000L, TransactionType.CHARGE, System.currentTimeMillis()),
+            new PointHistory(4L, userId, 3_000L, TransactionType.CHARGE, System.currentTimeMillis()),
+            new PointHistory(5L, userId, 5_000L, TransactionType.USE, System.currentTimeMillis())
+        );
+    
+        // when
+        when(pointHistoryTable.selectAllByUserId(userId))
+            .thenReturn(pointHistoryList);
+        List<PointHistory> result = pointServiceImpl.findUserHistory(userId);
+        
+        // then
+        assertNotNull(result);
+        assertEquals(5, result.size());
+        assertEquals(5_000L, result.get(4).amount());
+        assertEquals(TransactionType.CHARGE, result.get(2).type());
+
+        verify(pointHistoryTable, times(1)).selectAllByUserId(userId);
     }
 }

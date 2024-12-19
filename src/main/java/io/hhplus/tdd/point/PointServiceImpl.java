@@ -43,9 +43,9 @@ public class PointServiceImpl implements PointService {
     }
 
     @Override
-    public List<PointHistory> findUserHistory(long id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findUserHistory'");
+    public List<PointHistory> findUserHistory(long userId) {
+        List<PointHistory> PSpointHistoryList = pointHistoryTable.selectAllByUserId(userId);
+        return PSpointHistoryList;
     }
     
 }
