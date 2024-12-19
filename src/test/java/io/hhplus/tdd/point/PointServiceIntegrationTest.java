@@ -87,4 +87,23 @@ public class PointServiceIntegrationTest {
         assertEquals("포인트 충전 금액은 1_000 이상 100_000 이하여야 합니다.", result.getMessage());
         assertEquals(IllegalArgumentException.class, result.getClass());
     }
+
+    @Test
+    @DisplayName(value = "Integration [실패] 유저가 100,000 초과의 포인트를 충전하면 실패한다.")
+    void 유저가_100000_초과의_포인트를_충전하면_실패케이스() throws Exception {
+        // given
+        long userId = 1L;
+        long amount = 5_000L;
+        long chargeAmount = 100_001L;
+        
+        userPointTable.insertOrUpdate(userId, amount);
+
+        // when
+        Exception result = assertThrows(IllegalArgumentException.class, () ->
+            pointService.chargeUserPoint(userId, chargeAmount));
+    
+        // then
+        assertEquals("포인트 충전 금액은 1_000 이상 100_000 이하여야 합니다.", result.getMessage());
+        assertEquals(IllegalArgumentException.class, result.getClass());
+    }
 }
