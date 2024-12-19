@@ -45,6 +45,7 @@ public class PointServiceImpl implements PointService {
     @Override
     public List<PointHistory> findUserHistory(long userId) {
         List<PointHistory> PSpointHistoryList = pointHistoryTable.selectAllByUserId(userId);
+        if (PSpointHistoryList.size() == 0) throw new IllegalArgumentException("존재하지 않는 유저입니다.");
         return PSpointHistoryList;
     }
     

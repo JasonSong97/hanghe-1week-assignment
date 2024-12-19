@@ -11,6 +11,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
@@ -216,6 +217,25 @@ public class PointServiceImplTest {
         assertEquals(5, result.size());
         assertEquals(5_000L, result.get(4).amount());
         assertEquals(TransactionType.CHARGE, result.get(2).type());
+
+        verify(pointHistoryTable, times(1)).selectAllByUserId(userId);
+    }
+
+    @Test
+    @DisplayName(value = "Impl [실패] 존재하지 않는 유저가 포인트 충전과 포인트 사용내역을 조회하면 실패한다.")
+    void 존재하지_않는_유저가_포인트_충전과_포인트_사용내역을_조회하면_실패케이스() throws Exception {
+        // given
+        long userId = 999L;
+    
+        // when
+        when(pointHistoryTable.selectAllByUserId(userId))
+            .thenReturn(Collections.emptyList());
+        Exception result = assertThrows(IllegalArgumentException.class, () ->
+            pointServiceImpl.findUserHistory(userId));
+        
+        // then
+        assertEquals("존재하지 않는 유저입니다.", result.getMessage());
+        assertEquals(IllegalArgumentException.class, result.getClass());
 
         verify(pointHistoryTable, times(1)).selectAllByUserId(userId);
     }
