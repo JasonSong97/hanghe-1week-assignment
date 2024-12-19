@@ -239,4 +239,26 @@ public class PointServiceImplTest {
 
         verify(pointHistoryTable, times(1)).selectAllByUserId(userId);
     }
+
+    @Test
+    @DisplayName(value = "Impl [성공] 포인트 사용에 성공한다.")
+    void 포인트_사용_성공케이스() throws Exception {
+        // given
+        long userId = 1L;
+        long amount_1 = 2_000L;
+        long useAmount_1 = 1_000L;
+
+        UserPoint userPoint_1 = new UserPoint(userId, amount_1, System.currentTimeMillis());
+    
+        // when
+        when(userPointTable.selectById(userId))
+            .thenReturn(userPoint_1);
+        UserPoint result = pointServiceImpl.useUserPoint(userId, useAmount_1);
+    
+        // then
+        assertNotNull(result);
+        assertEquals(1_000L, result.point());
+
+        verify(userPointTable, times(1)).selectById(userId);
+    }
 }

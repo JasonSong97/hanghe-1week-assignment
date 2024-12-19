@@ -31,8 +31,15 @@ public class PointServiceImpl implements PointService {
 
     @Override
     public UserPoint useUserPoint(long userId, long amount) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'useUserPoint'");
+        // 사용자 조회
+        UserPoint PSuserPoint = userPointTable.selectById(userId);
+        // 조회된 사용자 포인트 감소
+        UserPoint updatedUserPoint = PSuserPoint.decreaseUserPoints(amount);
+        // 사용내역 저장
+        pointHistoryTable.insert(userId, amount, TransactionType.USE, System.currentTimeMillis());
+        // 변경된 사용자 업데이트
+        userPointTable.insertOrUpdate(updatedUserPoint.id(), updatedUserPoint.point());
+        return updatedUserPoint;
     }
 
     @Override

@@ -17,4 +17,9 @@ public record UserPoint(
         long newPoint = this.point + amount;
         return new UserPoint(this.id, newPoint, System.currentTimeMillis());
     }
+
+    public UserPoint decreaseUserPoints(long amount) {
+        long newPoint = this.point - amount;
+        return new UserPoint(this.id, newPoint, System.currentTimeMillis());
+    }
 }
