@@ -85,4 +85,71 @@ public class PointServiceConcurrcyTest {
         UserPoint result = pointService.findUserPoint(userId); // 최종 사용자 포인트 조회
         assertEquals(amount - (threadCount * useAmount), result.point(), "최종 잔고가 모든 사용 요청의 합과 일치해야 합니다.");
     }
+
+    @Test
+    @DisplayName(value = "[동시성테스트] 여러 스레드가 동시에 충전 및 사용 요청을 하면 데이터 정합성을 유지한다.")
+    void 동시_충전_및_사용_테스트() throws Exception {
+        // given
+        long userId = 1L;
+        long initialAmount = 50_000L; // 초기 잔고
+        long chargeAmount = 10_000L; // 충전 요청당 포인트
+        long useAmount = 15_000L;    // 사용 요청당 포인트
+    
+        int threadCount = 20; // 총 스레드 개수 (충전 및 사용 스레드 포함)
+        int chargeThreadCount = threadCount / 2; // 절반은 충전 요청
+        int useThreadCount = threadCount / 2;    // 나머지 절반은 사용 요청
+    
+        userPointTable.insertOrUpdate(userId, initialAmount); // 초기 사용자 잔고 설정
+    
+        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+        CountDownLatch latch = new CountDownLatch(threadCount);
+    
+        // when
+        for (int i = 0; i < chargeThreadCount; i++) {
+            executorService.submit(() -> {
+                try {
+                    pointService.chargeUserPoint(userId, chargeAmount); // 충전 요청
+                } finally {
+                    latch.countDown(); // 스레드 작업 완료
+                }
+            });
+        }
+    
+        for (int i = 0; i < useThreadCount; i++) {
+            executorService.submit(() -> {
+                try {
+                    try {
+                        pointService.useUserPoint(userId, useAmount); // 사용 요청
+                    } catch (IllegalArgumentException e) {
+                        // 사용 요청 실패 시 예외 처리 (잔고 부족 등)
+                    }
+                } finally {
+                    latch.countDown(); // 스레드 작업 완료
+                }
+            });
+        }
+    
+        latch.await(); // 모든 스레드 작업 완료 대기
+        executorService.shutdown();
+    
+        // then
+        UserPoint result = pointService.findUserPoint(userId); // 최종 사용자 포인트 조회
+    
+        // 순차 처리 결과 예상
+        long expectedFinalAmount = calculateExpectedFinalAmount(
+            initialAmount,
+            chargeAmount * chargeThreadCount,
+            useAmount,
+            useThreadCount
+        );
+    
+        assertEquals(expectedFinalAmount, result.point(), "최종 잔고가 순차 처리 결과와 동일해야 합니다.");
+    }
+    
+    private long calculateExpectedFinalAmount(long initialAmount, long totalCharged, long useAmount, int useThreadCount) {
+        long availableAmount = initialAmount + totalCharged; // 총 사용 가능 포인트
+        long totalSuccessfulUses = Math.min(useThreadCount, availableAmount / useAmount); // 최대 성공한 사용 횟수
+        return availableAmount - (totalSuccessfulUses * useAmount);
+    }
+    
 }
