@@ -21,6 +21,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import io.hhplus.tdd.LockRegistry;
 import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
 
@@ -29,6 +30,7 @@ public class PointServiceImplTest {
     
     @Mock private PointHistoryTable pointHistoryTable;
     @Mock private UserPointTable userPointTable;
+    @Mock private LockRegistry lockRegistry;
 
     @InjectMocks private PointServiceImpl pointServiceImpl; // 목 객체를 주입 받을 구현체, 실제 테스트 대상
 

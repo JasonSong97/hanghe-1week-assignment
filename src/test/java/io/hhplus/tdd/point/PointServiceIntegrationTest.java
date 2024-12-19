@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import io.hhplus.tdd.LockRegistry;
 import io.hhplus.tdd.TddApplication;
 import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
@@ -24,6 +25,7 @@ public class PointServiceIntegrationTest {
     private PointService pointService;
     private UserPointTable userPointTable;
     private PointHistoryTable pointHistoryTable;
+    private LockRegistry lockRegistry;
 
     /**
      * AutoWired
@@ -40,7 +42,8 @@ public class PointServiceIntegrationTest {
         // @AutoWired -> 생성자 주입
         userPointTable = new UserPointTable();
         pointHistoryTable = new PointHistoryTable();
-        pointService = new PointServiceImpl(pointHistoryTable, userPointTable);
+        lockRegistry = new LockRegistry();
+        pointService = new PointServiceImpl(pointHistoryTable, userPointTable, lockRegistry);
     }
 
     @Test
