@@ -327,4 +327,40 @@ public class PointServiceImplTest {
         verify(userPointTable, times(3)).selectById(anyLong());
         verify(pointHistoryTable, never()).selectAllByUserId(anyLong());
     }
+
+    @Test
+    @DisplayName(value = "Impl [실패] 유저가 500,000 초과의 포인트를 충전하면 실패한다.")
+    void 유저가_5000000_초과의_포인트를_충전하면_실패케이스스() throws Exception {
+        // given
+        long userId_1 = 1L;
+        long userId_2 = 2L;
+        long amount_1 = 5_000L;
+        long amount_2 = 7_000L;
+
+        long useAmount_1 = 500_001L;
+        long useAmount_2 = 600_000L;
+
+        UserPoint userPoint_1 = new UserPoint(userId_1, amount_1, System.currentTimeMillis());
+        UserPoint userPoint_2 = new UserPoint(userId_2, amount_2, System.currentTimeMillis());
+    
+        // when
+        when(userPointTable.selectById(userId_1)).thenReturn(userPoint_1);
+        when(userPointTable.selectById(userId_2)).thenReturn(userPoint_2);
+
+        Exception result_1 = assertThrows(IllegalArgumentException.class, () ->
+            pointServiceImpl.useUserPoint(userId_1, useAmount_1));
+        Exception result_2 = assertThrows(IllegalArgumentException.class, () ->
+            pointServiceImpl.useUserPoint(userId_2, useAmount_2));
+    
+        // then
+        assertNotNull(result_1);
+        assertNotNull(result_2);
+        assertEquals("포인트 사용 금액은 1_000 이상 500_000 이하여야 합니다.", result_1.getMessage());
+        assertEquals(IllegalArgumentException.class, result_1.getClass());
+        assertEquals("포인트 사용 금액은 1_000 이상 500_000 이하여야 합니다.", result_2.getMessage());
+        assertEquals(IllegalArgumentException.class, result_2.getClass());
+
+        verify(userPointTable, times(2)).selectById(anyLong());
+        verify(pointHistoryTable, never()).selectAllByUserId(anyLong());
+    }
 }
