@@ -38,6 +38,7 @@ public class PointServiceImpl implements PointService {
     @Override
     public UserPoint findUserPoint(long userId) {
         UserPoint PSuserPoint = userPointTable.selectById(userId);
+        if (PSuserPoint == null) throw new IllegalArgumentException("존재하지 않는 유저입니다.");
         return PSuserPoint;
     }
 
