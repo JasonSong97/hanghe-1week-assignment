@@ -2,6 +2,7 @@ package io.hhplus.tdd.point;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -49,5 +50,25 @@ public class PointServiceIntegrationTest {
         assertEquals(userId, PSpointHistoryList.get(0).id());
         assertEquals(chargePoint, PSpointHistoryList.get(0).amount());
         assertEquals(TransactionType.CHARGE, PSpointHistoryList.get(0).type());
+    }
+
+    @Test
+    @DisplayName(value = "Integration [실패] 존재하지 않는 유저가 포인트를 충전하면 실패한다.")
+    void 존재하지_않는_유저가_포인트를_충전하면_실패케이스() throws Exception {
+        // given
+        long existUserId = 1L;
+        long existCurrentAmount = 5_000L;
+        long nonExistUserId = 999L;
+        long nonExistCurrentAmount = 4_000L;
+
+        userPointTable.insertOrUpdate(existUserId, existCurrentAmount);
+    
+        // when
+        Exception result = assertThrows(IllegalArgumentException.class, () ->
+            pointService.chargeUserPoint(nonExistUserId, nonExistCurrentAmount));
+    
+        // then
+        assertEquals("존재하지 않는 유저입니다.", result.getMessage());
+        assertEquals(IllegalArgumentException.class, result.getClass());
     }
 }
