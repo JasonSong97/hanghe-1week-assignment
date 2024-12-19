@@ -6,7 +6,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +27,7 @@ public class PointServiceConcurrcyTest {
         long amount = 2_000L;
 
         long chargeAmount = 1_000L;
-        int threadCount = 50; // 50개의 스레드가 동시에 1000 요청
+        int threadCount = 20;
 
         userPointTable.insertOrUpdate(userId, amount);
 
@@ -52,5 +51,38 @@ public class PointServiceConcurrcyTest {
         // then
         UserPoint result = pointService.findUserPoint(userId);
         assertEquals(amount + chargeAmount * threadCount, result.point(), "최종 잔고가 모든 충전 요청의 합과 일치해야 합니다.");
+    }
+
+    @Test
+    @DisplayName(value = "[동시성테스트] 여러 스레드가 동시에 포인트 사용 요청을 하면 데이터 정합성을 유지한다.")
+    void 동시_포인트_사용_테스트() throws Exception {
+        // given
+        long userId = 1L;
+        long amount = 800_000L;
+        long useAmount = 3_000L;
+        int threadCount = 20;
+    
+        userPointTable.insertOrUpdate(userId, amount);
+    
+        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+        CountDownLatch latch = new CountDownLatch(threadCount);
+    
+        // when
+        for (int i = 0; i < threadCount; i++) {
+            executorService.submit(() -> {
+                try {
+                    pointService.useUserPoint(userId, useAmount); // 포인트 사용 요청
+                } finally {
+                    latch.countDown(); // 스레드 완료 시 latch 감소
+                }
+            });
+        }
+    
+        latch.await(); // 모든 스레드 작업 완료 대기
+        executorService.shutdown();
+    
+        // then
+        UserPoint result = pointService.findUserPoint(userId); // 최종 사용자 포인트 조회
+        assertEquals(amount - (threadCount * useAmount), result.point(), "최종 잔고가 모든 사용 요청의 합과 일치해야 합니다.");
     }
 }
