@@ -19,6 +19,9 @@ public record UserPoint(
     }
 
     public UserPoint decreaseUserPoints(long amount) {
+        if (amount < 1_000L) {
+            throw new IllegalArgumentException("포인트 사용 금액은 1_000 이상 500_000 이하여야 합니다.");
+        }
         long newPoint = this.point - amount;
         return new UserPoint(this.id, newPoint, System.currentTimeMillis());
     }

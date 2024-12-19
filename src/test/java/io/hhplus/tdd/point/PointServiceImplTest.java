@@ -281,4 +281,50 @@ public class PointServiceImplTest {
         
         verify(userPointTable, times(1)).selectById(userId);
     }
+
+    @Test
+    @DisplayName(value = "Impl [실패] 유저가 1,000 미만의 포인트를 사용하면 실패한다.")
+    void 유저가_1000_미만의_포인트를_사용하면_실패케이스() throws Exception {
+        // given
+        long userId_1 = 1L;
+        long userId_2 = 2L;
+        long userId_3 = 3L;
+        long amount_1 = 5_000L;
+        long amount_2 = 7_000L;
+        long amount_3 = 9_000L;
+
+        long useAmount_1 = 999L;
+        long useAmount_2 = 0L;
+        long useAmount_3 = -1L;
+
+        UserPoint userPoint_1 = new UserPoint(userId_1, amount_1, System.currentTimeMillis());
+        UserPoint userPoint_2 = new UserPoint(userId_2, amount_2, System.currentTimeMillis());
+        UserPoint userPoint_3 = new UserPoint(userId_3, amount_3, System.currentTimeMillis());
+    
+        // when
+        when(userPointTable.selectById(userId_1)).thenReturn(userPoint_1);
+        when(userPointTable.selectById(userId_2)).thenReturn(userPoint_2);
+        when(userPointTable.selectById(userId_3)).thenReturn(userPoint_3);
+
+        Exception result_1 = assertThrows(IllegalArgumentException.class, () ->
+            pointServiceImpl.useUserPoint(userId_1, useAmount_1));
+        Exception result_2 = assertThrows(IllegalArgumentException.class, () ->
+            pointServiceImpl.useUserPoint(userId_2, useAmount_2));
+        Exception result_3 = assertThrows(IllegalArgumentException.class, () ->
+            pointServiceImpl.useUserPoint(userId_3, useAmount_3));
+    
+        // then
+        assertNotNull(result_1);
+        assertNotNull(result_2);
+        assertNotNull(result_3);
+        assertEquals("포인트 사용 금액은 1_000 이상 500_000 이하여야 합니다.", result_1.getMessage());
+        assertEquals(IllegalArgumentException.class, result_1.getClass());
+        assertEquals("포인트 사용 금액은 1_000 이상 500_000 이하여야 합니다.", result_2.getMessage());
+        assertEquals(IllegalArgumentException.class, result_2.getClass());
+        assertEquals("포인트 사용 금액은 1_000 이상 500_000 이하여야 합니다.", result_3.getMessage());
+        assertEquals(IllegalArgumentException.class, result_3.getClass());
+
+        verify(userPointTable, times(3)).selectById(anyLong());
+        verify(pointHistoryTable, never()).selectAllByUserId(anyLong());
+    }
 }
