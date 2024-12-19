@@ -231,4 +231,24 @@ public class PointServiceIntegrationTest {
         assertEquals(userPoint, PSpointHistoryList.get(0).amount());
         assertEquals(TransactionType.USE, PSpointHistoryList.get(0).type());
     }
+
+    @Test
+    @DisplayName(value = "Integration [실패] 존재하지 않는 유저가 포인트를 사용하면 실패한다.")
+    void 존재하지_않는_유저가_포인트를_사용하면_실패케이스() throws Exception {
+        // given
+        long existUserId = 1L;
+        long existCurrentAmount = 5_000L;
+        long nonExistUserId = 999L;
+        long nonExistCurrentAmount = 4_000L;
+
+        userPointTable.insertOrUpdate(existUserId, existCurrentAmount);
+    
+        // when
+        Exception result = assertThrows(IllegalArgumentException.class, () ->
+            pointService.useUserPoint(nonExistUserId, nonExistCurrentAmount));
+    
+        // then
+        assertEquals("존재하지 않는 유저입니다.", result.getMessage());
+        assertEquals(IllegalArgumentException.class, result.getClass());
+    }
 }
