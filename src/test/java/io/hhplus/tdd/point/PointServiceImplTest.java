@@ -330,7 +330,7 @@ public class PointServiceImplTest {
 
     @Test
     @DisplayName(value = "Impl [실패] 유저가 500,000 초과의 포인트를 충전하면 실패한다.")
-    void 유저가_5000000_초과의_포인트를_충전하면_실패케이스스() throws Exception {
+    void 유저가_5000000_초과의_포인트를_충전하면_실패케이스() throws Exception {
         // given
         long userId_1 = 1L;
         long userId_2 = 2L;
@@ -362,5 +362,39 @@ public class PointServiceImplTest {
 
         verify(userPointTable, times(2)).selectById(anyLong());
         verify(pointHistoryTable, never()).selectAllByUserId(anyLong());
+    }
+
+    @Test
+    @DisplayName(value = "Impl [실패] 유저가 현재 가지고 있는 포인트보다 많은 포인트를 사용하면 실패한다.")
+    void 유저가_현재_가지고_있는_포인트보다_많은_포인트를_사용하면_실패케이스() throws Exception {
+        // given
+        long userId_1 = 1L;
+        long userId_2 = 2L;
+        long amount_1 = 5_000L;
+        long amount_2 = 5_000L;
+
+        long useAmount_1 = 5_001L;
+        long useAmount_2 = 6_000L;
+
+        UserPoint userPoint_1 = new UserPoint(userId_1, amount_1, System.currentTimeMillis());
+        UserPoint userPoint_2 = new UserPoint(userId_2, amount_2, System.currentTimeMillis());
+    
+        // when
+        when(userPointTable.selectById(userId_1)).thenReturn(userPoint_1);
+        when(userPointTable.selectById(userId_2)).thenReturn(userPoint_2);
+
+        Exception result_1 = assertThrows(IllegalArgumentException.class, () -> 
+            pointServiceImpl.useUserPoint(userId_1, useAmount_1));
+        Exception result_2 = assertThrows(IllegalArgumentException.class, () -> 
+            pointServiceImpl.useUserPoint(userId_2, useAmount_2));
+    
+        // then
+        assertEquals("현재 가지고 있는 포인트보다 많이 사용할 수 없습니다.", result_1.getMessage());
+        assertEquals(IllegalArgumentException.class, result_1.getClass());
+        assertEquals("현재 가지고 있는 포인트보다 많이 사용할 수 없습니다.", result_2.getMessage());
+        assertEquals(IllegalArgumentException.class, result_2.getClass());
+
+        verify(userPointTable, times(2)).selectById(anyLong());
+        verify(pointHistoryTable, never()).insert(anyLong(), anyLong(), any(), anyLong());
     }
 }
