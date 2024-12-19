@@ -33,6 +33,7 @@ public class PointServiceImpl implements PointService {
     public UserPoint useUserPoint(long userId, long amount) {
         // 사용자 조회
         UserPoint PSuserPoint = userPointTable.selectById(userId);
+        if (PSuserPoint == null) throw new IllegalArgumentException("존재하지 않는 유저입니다.");
         // 조회된 사용자 포인트 감소
         UserPoint updatedUserPoint = PSuserPoint.decreaseUserPoints(amount);
         // 사용내역 저장

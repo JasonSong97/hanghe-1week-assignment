@@ -261,4 +261,24 @@ public class PointServiceImplTest {
 
         verify(userPointTable, times(1)).selectById(userId);
     }
+
+    @Test
+    @DisplayName(value = "Impl [실패] 존재하지 않는 유저가 포인트를 사용하면 실패한다.")
+    void 존재하지_않는_유저가_포인트를_사용하면_실패케이스() throws Exception {
+        // given
+        long userId = 999L;
+        long amount = 1_000L;
+    
+        // when
+        when(userPointTable.selectById(userId))
+            .thenReturn(null);
+        Exception result = assertThrows(IllegalArgumentException.class, () ->
+            pointServiceImpl.useUserPoint(userId, amount));
+        
+        // then
+        assertEquals("존재하지 않는 유저입니다.", result.getMessage());
+        assertEquals(IllegalArgumentException.class, result.getClass());
+        
+        verify(userPointTable, times(1)).selectById(userId);
+    }
 }
